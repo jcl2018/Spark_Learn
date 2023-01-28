@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
 
 class KMeans(object):
     def __init__(self, k=10, max_iter=20):
@@ -8,20 +6,23 @@ class KMeans(object):
         self.max_iter = max_iter
 
     def fit(self, X, init_centroids=None):
+        all_cost = []
 
         # 0th iteration
-        X_P_list = self.partition(X, init_centroids)
-        init_cost = self.cost_cal(X_P_list, init_centroids)
+        X_P_list, init_cost = self.partition_and_calc_cost(X, init_centroids)
         print("Init cost is: \t", init_cost)
+        all_cost.append(init_cost)
         C = self.recalc_centroid(X_P_list)
 
         for iter in range(self.max_iter):
-            X_P_list = self.partition(X, C)
-            cost = self.cost_cal(X_P_list, C)
+            X_P_list, cost = self.partition_and_calc_cost(X, C)
             print("Iteration%d cost is: \t" % iter, cost)
+            all_cost.append(cost)
             C = self.recalc_centroid(X_P_list)
 
-    def partition(self, X, C):
+        return all_cost
+
+    def partition_and_calc_cost(self, X, C):
         # X: np.array(num_X, M)
         # C: np.array(num_partition, M)
         num_X, M = X.shape
@@ -29,6 +30,7 @@ class KMeans(object):
 
         all_X_list = [[] for i in range(num_partition)]
 
+        cost = 0.0
         for i in range(num_X):
             part_idx = -1
             min_dist = np.finfo(X.dtype).max
@@ -37,7 +39,7 @@ class KMeans(object):
                 if tmp_dist < min_dist:
                     part_idx = p
                     min_dist = tmp_dist
-
+            cost += min_dist
             all_X_list[part_idx].append(X[i])
 
         # stack up!
@@ -45,7 +47,7 @@ class KMeans(object):
         for i in range(len(all_X_list)):
             all_X_np.append(np.stack(all_X_list[i]))
 
-        return all_X_np
+        return all_X_np, cost
 
     def recalc_centroid(self, X):
         # X: list of np.array(num_X, M), num_partition
@@ -56,29 +58,8 @@ class KMeans(object):
             C[p] = np.mean(X[p], axis=0)  # mean of each feature
         return C
 
-    def cost_cal(self, X, C):
-        # X: list of np.array(num_X, M), num_partition
-        # C: np.array(num_partition, M)
-        cost = 0.0
-        num_partition = len(X)
-        for p in range(num_partition):
-            X_P = X[p]  # (num_X, M)
-            C_P = C[p]  # (M)
-            num_X, M = X[p].shape
-
-            for n in range(num_X):
-                cost += self.dist_func(X_P[n], C_P)
-        return cost
-
     def dist_func(self, x, c):
         # X, C: np.array(M)
         tmp = np.square(x - c)
         tmp = np.sum(tmp)
         return tmp
-
-    def plot(self, X, C=None):
-
-        plt.scatter(X[:, 0], X[:, 1])
-
-        plt.show()
-        plt.savefig('test.png')
