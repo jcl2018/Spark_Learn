@@ -7,7 +7,7 @@ N_TOTAL = 4601
 N_C1 = 10
 N_C2 = 10
 M = 58
-
+MAX_ITER = 20
 
 def load_data(path, data):
     with open(path, 'r') as f:
@@ -49,13 +49,14 @@ def run_non_spark():
     X = np.zeros((N_TOTAL, M))
     load_data("../hw2-bundle/kmeans/data/data.txt", X)
 
-    km_non_spark = KMeans(k=N_C1, max_iter=20)
+    km_non_spark = KMeans(k=N_C1, max_iter=MAX_ITER)
     all_cost1 = km_non_spark.fit(X, init_centroids=C1)
 
-    km_non_spark1 = KMeans(k=N_C2, max_iter=20)
+    km_non_spark1 = KMeans(k=N_C2, max_iter=MAX_ITER)
     all_cost2 = km_non_spark1.fit(X, init_centroids=C2)
 
     plot_cost(all_cost1, all_cost2)
 
 if __name__ == "__main__":
     run_non_spark()
+

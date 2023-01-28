@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 class KMeans(object):
     def __init__(self, k=10, max_iter=20):
@@ -14,7 +15,7 @@ class KMeans(object):
         all_cost.append(init_cost)
         C = self.recalc_centroid(X_P_list)
 
-        for iter in range(self.max_iter):
+        for iter in tqdm(range(self.max_iter)):
             X_P_list, cost = self.partition_and_calc_cost(X, C)
             print("Iteration%d cost is: \t" % iter, cost)
             all_cost.append(cost)
